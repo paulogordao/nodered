@@ -1,0 +1,643 @@
+[
+    {
+        "id": "2b1db1a7c0234fef",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "f6f2187d.f17ca8",
+        "type": "tab",
+        "label": "Teste",
+        "disabled": false,
+        "info": ""
+    },
+    {
+        "id": "d7c40f30d70e976d",
+        "type": "tab",
+        "label": "Cron - Worker",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "443d18e1734a9090",
+        "type": "tab",
+        "label": "Página processos",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "fed2b8fc049d7e21",
+        "type": "MySQLdatabase",
+        "name": "nodered_teste",
+        "host": "172.17.0.3",
+        "port": "3306",
+        "db": "nodered_teste",
+        "tz": "",
+        "charset": "UTF8"
+    },
+    {
+        "id": "07a1717699c04e0f",
+        "type": "http in",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "url": "/testePost",
+        "method": "post",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 100,
+        "y": 160,
+        "wires": [
+            [
+                "b53d446485472bac"
+            ]
+        ]
+    },
+    {
+        "id": "31f67c0121c583a6",
+        "type": "debug",
+        "z": "f6f2187d.f17ca8",
+        "name": "debug 1",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 880,
+        "y": 440,
+        "wires": []
+    },
+    {
+        "id": "b53d446485472bac",
+        "type": "json",
+        "z": "f6f2187d.f17ca8",
+        "name": "converte JSON",
+        "property": "payload",
+        "action": "",
+        "pretty": false,
+        "x": 320,
+        "y": 160,
+        "wires": [
+            [
+                "a857c5e3fa89f4f4"
+            ]
+        ]
+    },
+    {
+        "id": "a857c5e3fa89f4f4",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "valida entrada",
+        "func": "// Verificar se todos os campos obrigatórios estão presentes\nif (msg.payload.hasOwnProperty(\"chave_parceiro\") &&\n    msg.payload.hasOwnProperty(\"controle_processo\") &&\n    msg.payload.hasOwnProperty(\"dados_cadastrais\") &&\n    Array.isArray(msg.payload.dados_cadastrais) &&\n    msg.payload.dados_cadastrais.length > 0) {\n\n    // Todos os campos obrigatórios estão preenchidos\n    return msg;\n} else {\n\n    // Construir uma mensagem de erro\n    const errorMessage = \"Erro: Algum campo obrigatório está faltando\";\n\n    // Inicializar o objeto msg.res se ainda não existir\n    msg.res = msg.res || {};\n\n    // Definir a resposta HTTP com o código de erro e a mensagem de erro\n    msg.res.statusCode = 400; // Código de erro \"Bad Request\"\n    msg.res.payload = { error: errorMessage };\n    return msg;\n}",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 520,
+        "y": 160,
+        "wires": [
+            [
+                "6f9084fa248a3643"
+            ]
+        ]
+    },
+    {
+        "id": "68350c3a75699da4",
+        "type": "catch",
+        "z": "f6f2187d.f17ca8",
+        "name": "Exception",
+        "scope": [
+            "07a1717699c04e0f",
+            "b53d446485472bac",
+            "f8f1735ce09866d1"
+        ],
+        "uncaught": false,
+        "x": 100,
+        "y": 520,
+        "wires": [
+            [
+                "e644101894d73cfe"
+            ]
+        ]
+    },
+    {
+        "id": "e644101894d73cfe",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "trata erro 400",
+        "func": "if (msg.error && msg.error.message && msg.error.message.includes(\"Unexpected token\")) {\n    // Obter a posição do token inválido\n    const position = parseInt(msg.error.message.match(/position (\\d+)/)[1], 10);\n\n    // Construir uma mensagem de erro com a posição\n    const errorMessage = `Erro de sintaxe JSON na posição ${position}`;\n\n    // Inicializar o objeto msg.res se ainda não existir\n    msg.res = msg.res || {};\n\n    // Definir a resposta HTTP com o código de erro e a mensagem de erro\n    msg.res.statusCode = 400; // Código de erro \"Bad Request\"\n    msg.res.payload = { error: errorMessage };\n}else{\n\n    msg.res = msg.res || {};\n    msg.res.statusCode = 400; // Código de erro \"Bad Request\"\n    msg.res.payload = { error : msg.error.message};\n}\n\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 300,
+        "y": 520,
+        "wires": [
+            [
+                "e20fe8d6e58d4abc"
+            ]
+        ]
+    },
+    {
+        "id": "1e6de77f482f052f",
+        "type": "http response",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "statusCode": "400",
+        "headers": {},
+        "x": 720,
+        "y": 520,
+        "wires": []
+    },
+    {
+        "id": "e20fe8d6e58d4abc",
+        "type": "change",
+        "z": "f6f2187d.f17ca8",
+        "name": "Set Headers",
+        "rules": [
+            {
+                "t": "set",
+                "p": "headers",
+                "pt": "msg",
+                "to": "{}",
+                "tot": "json"
+            },
+            {
+                "t": "set",
+                "p": "headers.content-type",
+                "pt": "msg",
+                "to": "application/json",
+                "tot": "str"
+            },
+            {
+                "t": "set",
+                "p": "statusCode",
+                "pt": "msg",
+                "to": "400",
+                "tot": "str"
+            },
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "res.payload",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 510,
+        "y": 520,
+        "wires": [
+            [
+                "1e6de77f482f052f"
+            ]
+        ]
+    },
+    {
+        "id": "6f9084fa248a3643",
+        "type": "switch",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "property": "res.payload",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "null"
+            },
+            {
+                "t": "nnull"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 710,
+        "y": 160,
+        "wires": [
+            [
+                "c2444d8551a3661f"
+            ],
+            [
+                "a4816a2d392c78a3"
+            ]
+        ]
+    },
+    {
+        "id": "f8f1735ce09866d1",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "insert_fila_processamento",
+        "func": "// Acessar os dados do JSON recebido\nconst chaveParceiro = msg.entrada_json.chave_parceiro;\nconst controleProcesso = msg.entrada_json.controle_processo;;\n\n//if (msg.payload.length > 0) {\n    //errorMessage = \"Teste de erro 2\";\n    //const chaveParceiro = msg.payload[0].chaveParceiro;\n    //const controleProcesso = msg.payload[0].controleProcesso;\n\n// Verificar se a conversão foi bem-sucedida\n//if (isNaN(controleProcesso)) {\n    // Se o valor não puder ser convertido para um número, lançar um erro\n    //throw new Error('O5 valor do controle_processo não é um número válido.');\n//}\n\n\n\nconst dadosCadastrais = msg.entrada_json.dados_cadastrais;\nconst status = 0;\nconst dataAtual = new Date();\n// Formatar a data no formato desejado (YYYY-MM-DD HH:MM:SS)\nconst dataFormatada = dataAtual.toISOString().slice(0, 19).replace('T', ' ');\n\nconst jsonCompleto = JSON.stringify(msg.entrada_json);\n\n\n// Criar a consulta de inserção\nlet query = `INSERT INTO filaProcessamento (chaveParceiro, controleProcesso, status, dataEnvio, json) VALUES `;\n\n// Iterar sobre os dados cadastrais\n//dadosCadastrais.forEach((item, index) => {\n    //const cpf = item.cpf;\n    //const nome = item.nome;\n\n    // Adicionar os valores na consulta\n    //query += `('${chaveParceiro}', '${controleProcesso}', '${cpf}', '${nome}')`;\n\n    // Adicionar vírgula, exceto para o último item\n    //if (index < dadosCadastrais.length - 1) {\n        //query += ', ';\n    //}\n//});\n\n\n// Adicionar os valores na consulta\nquery += `('${chaveParceiro}', '${controleProcesso}', '${status}', '${dataFormatada}', '${jsonCompleto}')`;\n\n// Enviar a consulta ao próximo nó MySQL\nmsg.topic = query;\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 170,
+        "y": 380,
+        "wires": [
+            [
+                "d614f2ebc70be2af"
+            ]
+        ]
+    },
+    {
+        "id": "c2444d8551a3661f",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "verifica_fila_processamento",
+        "func": "//Atribui o JSON original a outra variável para ser utilizado\n//no restante do fluxo\nmsg.entrada_json = msg.payload;\n\n// Acessar os dados do JSON recebido\nconst chaveParceiro = msg.payload.chave_parceiro;\nconst controleProcesso = msg.payload.controle_processo;\n\n// Verificar se o valor é um número\n//if (typeof controleProcesso !== 'number') {\n    // Se o valor não for um número, lançar um erro\n    //throw new Error('O2 valor do controle_processo não é um número válido.');\n//}\n\n\n// Criar a consulta de inserção\nlet query = `SELECT * FROM filaProcessamento WHERE chaveParceiro = '${chaveParceiro}'  \nAND controleProcesso = '${controleProcesso}'`;\n\n\n// Enviar a consulta ao próximo nó MySQL\nmsg.topic = query;\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 180,
+        "y": 280,
+        "wires": [
+            [
+                "38d0a1d7a5767393"
+            ]
+        ]
+    },
+    {
+        "id": "2df0abdcbb460bda",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "trata_retorno",
+        "func": "let errorMessage = \"\";\nmsg.insert = false;\nif (msg.payload.length > 0) {\n    errorMessage = \"Teste de erro 2\";\n    const chaveParceiro = msg.payload[0].chaveParceiro;\n    const controleProcesso = msg.payload[0].controleProcesso;\n    const dataEnvio = msg.payload[0].dataEnvio;\n\n    // Definir os valores no objeto de resposta\n    errorMessage = \"Registro já enviado\";\n    msg.res.statusCode = 200;\n    msg.res.payload = {\n        chaveParceiro: chaveParceiro,\n        controleProcesso: controleProcesso,\n        dataEnvio: dataEnvio,\n        error: errorMessage\n    };\n\n}else{\n\n    msg.insert = true;\n    // Inicializar o objeto msg.res se ainda não existir\n    msg.res = msg.res || {};\n\n    // Definir a resposta HTTP com o código de erro e a mensagem de erro\n    msg.res.statusCode = 400; // Código de erro \"Bad Request\"\n    msg.res.payload = { error: errorMessage };\n}\n\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 670,
+        "y": 280,
+        "wires": [
+            [
+                "5978577f861da251"
+            ]
+        ]
+    },
+    {
+        "id": "69e4e6417ba91c25",
+        "type": "change",
+        "z": "f6f2187d.f17ca8",
+        "name": "Set Headers",
+        "rules": [
+            {
+                "t": "set",
+                "p": "headers",
+                "pt": "msg",
+                "to": "{}",
+                "tot": "json"
+            },
+            {
+                "t": "set",
+                "p": "headers.content-type",
+                "pt": "msg",
+                "to": "application/json",
+                "tot": "str"
+            },
+            {
+                "t": "set",
+                "p": "statusCode",
+                "pt": "msg",
+                "to": "200",
+                "tot": "str"
+            },
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "res.payload",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 870,
+        "y": 380,
+        "wires": [
+            [
+                "4ac92bf947ea8a60"
+            ]
+        ]
+    },
+    {
+        "id": "4ac92bf947ea8a60",
+        "type": "http response",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "statusCode": "200",
+        "headers": {},
+        "x": 1080,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "5978577f861da251",
+        "type": "switch",
+        "z": "f6f2187d.f17ca8",
+        "name": "insere registro?",
+        "property": "insert",
+        "propertyType": "msg",
+        "rules": [
+            {
+                "t": "false"
+            },
+            {
+                "t": "true"
+            }
+        ],
+        "checkall": "true",
+        "repair": false,
+        "outputs": 2,
+        "x": 900,
+        "y": 280,
+        "wires": [
+            [
+                "69e4e6417ba91c25"
+            ],
+            [
+                "f8f1735ce09866d1"
+            ]
+        ]
+    },
+    {
+        "id": "fdbb55e65216e4ce",
+        "type": "function",
+        "z": "f6f2187d.f17ca8",
+        "name": "trata_retorno",
+        "func": "let errorMessage = \"Dado não inserido\";\nif (msg.payload.affectedRows > 0){\n\n        //errorMessage = \"Teste de erro 2\";\n        const protocolo = msg.payload.insertId;\n        \n        // Definir os valores no objeto de resposta\n        //errorMessage = \"Registro já enviado\";\n        msg.res.statusCode = 200;\n        msg.res.payload = {\n            protocolo: protocolo,\n            mensagem: \"Dado inserido com sucesso\"\n        };\n}else{\n    // Inicializar o objeto msg.res se ainda não existir\n    msg.res = msg.res || {};\n\n    // Definir a resposta HTTP com o código de erro e a mensagem de erro\n    msg.res.statusCode = 400; // Código de erro \"Bad Request\"\n    msg.res.payload = { error: errorMessage };\n}\n\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 650,
+        "y": 380,
+        "wires": [
+            [
+                "69e4e6417ba91c25"
+            ]
+        ]
+    },
+    {
+        "id": "a4816a2d392c78a3",
+        "type": "change",
+        "z": "f6f2187d.f17ca8",
+        "name": "Set Headers",
+        "rules": [
+            {
+                "t": "set",
+                "p": "headers",
+                "pt": "msg",
+                "to": "{}",
+                "tot": "json"
+            },
+            {
+                "t": "set",
+                "p": "headers.content-type",
+                "pt": "msg",
+                "to": "application/json",
+                "tot": "str"
+            },
+            {
+                "t": "set",
+                "p": "statusCode",
+                "pt": "msg",
+                "to": "400",
+                "tot": "str"
+            },
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "res.payload",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 910,
+        "y": 160,
+        "wires": [
+            [
+                "52cdeef4fdcbcd0b"
+            ]
+        ]
+    },
+    {
+        "id": "52cdeef4fdcbcd0b",
+        "type": "http response",
+        "z": "f6f2187d.f17ca8",
+        "name": "",
+        "statusCode": "400",
+        "headers": {},
+        "x": 1120,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "38d0a1d7a5767393",
+        "type": "mysql",
+        "z": "f6f2187d.f17ca8",
+        "mydb": "fed2b8fc049d7e21",
+        "name": "nodered_teste",
+        "x": 440,
+        "y": 280,
+        "wires": [
+            [
+                "2df0abdcbb460bda"
+            ]
+        ]
+    },
+    {
+        "id": "d614f2ebc70be2af",
+        "type": "mysql",
+        "z": "f6f2187d.f17ca8",
+        "mydb": "fed2b8fc049d7e21",
+        "name": "nodered_teste",
+        "x": 440,
+        "y": 380,
+        "wires": [
+            [
+                "fdbb55e65216e4ce",
+                "31f67c0121c583a6"
+            ]
+        ]
+    },
+    {
+        "id": "60bfa58d0bd1a8fa",
+        "type": "inject",
+        "z": "d7c40f30d70e976d",
+        "name": "inject",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "select f.id as idFila, p.id as idParceiro, f.json dadosCadastrais from filaProcessamento f, parceiro p  where  f.status = 0 and f.chaveParceiro = p.chave  limit 1;",
+        "payload": "",
+        "payloadType": "date",
+        "x": 150,
+        "y": 180,
+        "wires": [
+            [
+                "8ba28749bf867aa8"
+            ]
+        ]
+    },
+    {
+        "id": "8ba28749bf867aa8",
+        "type": "mysql",
+        "z": "d7c40f30d70e976d",
+        "mydb": "fed2b8fc049d7e21",
+        "name": "nodered_teste",
+        "x": 340,
+        "y": 180,
+        "wires": [
+            [
+                "66e73f9f82979299"
+            ]
+        ]
+    },
+    {
+        "id": "66e73f9f82979299",
+        "type": "function",
+        "z": "d7c40f30d70e976d",
+        "name": "insere_dados",
+        "func": "// Verificar se o objeto JSON retornado possui a propriedade 'json'\nif (msg.payload) {\n    const dadosCadastrais = msg.payload[0].dadosCadastrais.dados_cadastrais;\n    const idProcesso = msg.payload[0].idFila;\n    const idParceiro = msg.payload[0].idParceiro;\n    const status = 4;\n    const dataAtual = new Date();\n    const dataFormatada = dataAtual.toISOString().slice(0, 19).replace('T', ' ');\n\n    if (dadosCadastrais && Array.isArray(dadosCadastrais) && dadosCadastrais.length > 0) {\n        // Criar a consulta de inserção\n        let query = `INSERT INTO cadastroParceiro (idParceiro, idProcesso, status, dataCriacao, \n        dataProcessamento, cpf, nome) VALUES`;\n\n        // Iterar sobre os dados cadastrais\n        dadosCadastrais.forEach((item, index) => {\n            const cpf = item.cpf;\n            const nome = item.nome;\n\n            // Adicionar os valores na consulta\n            query += ` ('${idParceiro}', '${idProcesso}', '${status}', '${dataFormatada}', '${dataFormatada}',\n            '${cpf}', '${nome}')`;\n\n            // Adicionar vírgula, exceto para o último item\n            if (index < dadosCadastrais.length - 1) {\n                query += ',';\n            }\n        });\n\n        // Enviar a consulta de inserção ao próximo nó MySQL\n        msg.topic = query;\n\n        // Adicionar a consulta de atualização do status\n        const updateQuery = `UPDATE filaProcessamento SET status = ${status} WHERE id = ${idProcesso}`;\n\n        // Adicionar a consulta de atualização ao próximo nó MySQL\n        msg.updateQuery = updateQuery;\n\n        return msg;\n    }\n}\n\n// Se não houver dados válidos para persistir, encaminhar a mensagem vazia\nreturn null;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 200,
+        "y": 260,
+        "wires": [
+            [
+                "a7397d5e61d71437"
+            ]
+        ]
+    },
+    {
+        "id": "a7397d5e61d71437",
+        "type": "mysql",
+        "z": "d7c40f30d70e976d",
+        "mydb": "fed2b8fc049d7e21",
+        "name": "nodered_teste",
+        "x": 440,
+        "y": 260,
+        "wires": [
+            [
+                "9952192f016a62c3"
+            ]
+        ]
+    },
+    {
+        "id": "9952192f016a62c3",
+        "type": "function",
+        "z": "d7c40f30d70e976d",
+        "name": "update_fila",
+        "func": "// Verificar se a mensagem contém a propriedade updateQuery\nif (msg.updateQuery) {\n    // Definir a consulta de atualização\n    msg.topic = msg.updateQuery;\n\n    // Retornar a mensagem para ser enviada ao próximo nó MySQL para execução\n    return msg;\n}\n\n// Se não houver consulta de atualização, encaminhar a mensagem vazia\nreturn null;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 170,
+        "y": 340,
+        "wires": [
+            [
+                "2e6aee33c10fd721"
+            ]
+        ]
+    },
+    {
+        "id": "2e6aee33c10fd721",
+        "type": "mysql",
+        "z": "d7c40f30d70e976d",
+        "mydb": "fed2b8fc049d7e21",
+        "name": "nodered_teste",
+        "x": 360,
+        "y": 340,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "59ff2a1.fa600d4",
+        "type": "http in",
+        "z": "443d18e1734a9090",
+        "name": "",
+        "url": "/vericaProcessos",
+        "method": "get",
+        "upload": false,
+        "swaggerDoc": "",
+        "x": 160,
+        "y": 80,
+        "wires": [
+            [
+                "54c1e70d.ab3e18"
+            ]
+        ]
+    },
+    {
+        "id": "54c1e70d.ab3e18",
+        "type": "template",
+        "z": "443d18e1734a9090",
+        "name": "page",
+        "field": "payload",
+        "fieldType": "msg",
+        "format": "handlebars",
+        "syntax": "mustache",
+        "template": "<!DOCTYPE html>\n<html>\n<head>\n  <title>Processamento de cadastros por parceiro</title>\n  <style>\n    body {\n      font-family: Arial, sans-serif;\n      background-color: #F4F4F4;\n    }\n\n    h1 {\n      color: #FF6F00;\n      text-align: center;\n      margin-top: 20px;\n    }\n\n    form {\n      text-align: center;\n      margin-top: 30px;\n    }\n\n    label {\n      font-size: 18px;\n      color: #FF6F00;\n      margin-right: 10px;\n    }\n\n    input[type=\"text\"] {\n      padding: 5px;\n      font-size: 16px;\n    }\n\n    button {\n      padding: 8px 16px;\n      background-color: #FF6F00;\n      color: #FFFFFF;\n      border: none;\n      font-size: 16px;\n      cursor: pointer;\n    }\n\n    table {\n      margin: 30px auto;\n      border-collapse: collapse;\n      width: 80%;\n      background-color: #FFFFFF;\n      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);\n    }\n\n    th, td {\n      padding: 12px;\n      text-align: left;\n    }\n\n    th {\n      background-color: #FF6F00;\n      color: #FFFFFF;\n    }\n\n    tr:nth-child(even) {\n      background-color: #F9F9F9;\n    }\n  </style>\n</head>\n<body>\n  <h1>Processamento de cadastros por parceiro</h1>\n\n  <form>\n    <label for=\"remessa\">Número de remessa:</label>\n    <input type=\"text\" id=\"remessa\" name=\"remessa\" />\n\n    <button type=\"submit\">Consultar</button>\n  </form>\n\n  <table>\n    <thead>\n      <tr>\n        <th>ID do Processo</th>\n        <th>Data de Envio</th>\n        <th>Data de Processamento</th>\n        <th>Status</th>\n      </tr>\n    </thead>\n    <tbody id=\"table-body\">\n      <!-- Os dados da tabela serão preenchidos dinamicamente com JavaScript -->\n    </tbody>\n  </table>\n\n  <script>\n    // Dados fictícios para preencher a tabela\n    const data = [\n      { id: 1, dataEnvio: '2023-05-01', dataProcessamento: '2023-05-02', status: 'Concluído' },\n      { id: 2, dataEnvio: '2023-05-03', dataProcessamento: '2023-05-04', status: 'Concluído' },\n      { id: 3, dataEnvio: '2023-05-05', dataProcessamento: '2023-05-06', status: 'Pendente' },\n      { id: 4, dataEnvio: '2023-05-07', dataProcessamento: '2023-05-08', status: 'Pendente' },\n      { id: 5, dataEnvio: '2023-05-09', dataProcessamento: '2023-05-10', status: 'Concluído' }\n    ];\n\n    // Função para preencher a tabela com os dados\n    function populateTable() {\n      const tableBody = document.getElementById('table-body');\n\n      // Limpar o conteúdo atual da tabela\n      tableBody.innerHTML = '';\n\n      // Iterar sobre os dados e criar as linhas da tabela\n      data.forEach(item => {\n        const row = document.createElement('tr');\n\n        const idCell = document.createElement('td');\n        idCell.textContent = item.id;\n        row.appendChild(idCell);\n\n        const envioCell = document.createElement('td');\n        envioCell.textContent = item.dataEnvio;\n        row.appendChild(envioCell);\n\n        const processamentoCell = document.createElement('td');\n        processamentoCell.textContent = item.dataProcessamento;\n        row.appendChild(processamentoCell);\n\n        const statusCell = document.createElement('td');\n        statusCell.textContent = item.status;\n        row.appendChild(statusCell);\n\n        tableBody.appendChild(row);\n      });\n    }\n\n    // Chamar a função para preencher a tabela\n    populateTable();\n  </script>\n</body>\n</html>\n",
+        "x": 370,
+        "y": 80,
+        "wires": [
+            [
+                "266c286f.d993d8"
+            ]
+        ]
+    },
+    {
+        "id": "266c286f.d993d8",
+        "type": "http response",
+        "z": "443d18e1734a9090",
+        "name": "",
+        "statusCode": "200",
+        "headers": {},
+        "x": 540,
+        "y": 80,
+        "wires": []
+    }
+]
